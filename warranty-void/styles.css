@@ -19,3 +19,191 @@ button{font:inherit;cursor:pointer}button:focus-visible,a:focus-visible,summary:
 @media(max-width:700px){.topbar{padding:14px}.subbrand{letter-spacing:1px}.page{padding:13px}.modes,.game-grid{grid-template-columns:1fr}.mode-card{min-height:265px}.hero h1{letter-spacing:-1.5px}.tools-panel{grid-column:auto}.tools-panel .panel-body{grid-template-columns:1fr}.tools-panel .manual{grid-column:auto}.wanted .sticky{right:10px;top:50px}.bench{min-height:330px}.part-node{width:100px;min-height:64px}.btn{min-height:42px}.decision-grid{grid-template-columns:1fr}.result-card{max-height:94vh;overflow:auto}}
 @media(max-width:380px){.part-node{width:88px;padding:5px}.part-node .node-name{font-size:10px}.top-controls .btn{font-size:11px;padding:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+
+/* v0.2: the repair bench is the star, tools are its tray, log its own column. */
+.game-grid{
+  display:grid;
+  grid-template-columns:minmax(215px,.78fr) minmax(425px,1.75fr) minmax(265px,.91fr);
+  align-items:start;gap:16px;
+}
+.order-column,.workstation,.terminal-column{min-width:0}
+.workstation{display:grid;gap:14px}
+.terminal-column{position:sticky;top:16px}
+.bench{
+  min-height:410px;
+  margin:14px;
+  position:relative;
+  isolation:isolate;
+  border-radius:16px;
+  background:
+    linear-gradient(90deg,#13252a55 1px,transparent 1px),
+    linear-gradient(#13252a55 1px,transparent 1px),
+    radial-gradient(circle at center,#45605d 0%,#233d40 49%,#112529 100%);
+  background-size:24px 24px,24px 24px,auto;
+  border:2px solid #68817a;
+  box-shadow:inset 0 0 0 7px #152729, inset 0 0 45px #050b0fa8, 0 8px 24px #0610125e;
+}
+.bench:before{
+  inset:16px;
+  border:1px dashed #83b1a166;
+  border-radius:8px;
+  box-shadow:none;
+}
+.bench:after{
+  content:"";
+  position:absolute;bottom:0;left:0;right:0;height:16px;
+  background:repeating-linear-gradient(90deg,#254345,#254345 15px,#315456 16px,#315456 18px);
+  border-top:2px solid #7b9a8b;z-index:-1;
+}
+.bench-surface{position:absolute;inset:0;pointer-events:none}
+.bench-ruler,.bench-no{
+  position:absolute;color:#bed6c566;font:9px 'DM Mono',monospace;letter-spacing:1.5px;
+  z-index:1;white-space:nowrap;
+}
+.bench-ruler{top:23px;left:28px}
+.bench-no{bottom:27px;left:28px;max-width:70%;overflow:hidden;text-overflow:ellipsis}
+.device-art{position:absolute;inset:4% 5% 3%;pointer-events:none;z-index:0;filter:drop-shadow(0 9px 12px #0008)}
+.appliance-svg{width:100%;height:100%;display:block}
+.part-node{
+  z-index:2;
+  width:clamp(92px,22%,122px);
+  min-height:69px;
+  padding:10px 9px 8px;
+  border-radius:12px;
+  border:1px solid #a6c9b8;
+  background:linear-gradient(140deg,#142b2ceb,#142f32f7);
+  box-shadow:0 3px 0 #0a1518, 0 6px 18px #040909a8;
+  color:#edf6ee;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  outline-offset:3px;
+}
+.part-node .node-symbol{
+  display:inline-grid;place-items:center;
+  min-width:23px;min-height:23px;border-radius:7px;
+  background:#5d7f76;color:#f1fff1;font:11px 'DM Mono',monospace;margin:0 0 3px;
+}
+.part-node .node-name{font-size:12px;line-height:1.14;font-weight:700;overflow-wrap:anywhere}
+.part-node .node-status{font-size:9px;letter-spacing:.1px;color:#a7c2bc;display:flex;align-items:center;justify-content:center;gap:5px}
+.node-status i{width:6px;height:6px;border-radius:50%;background:#778f8d;flex-shrink:0}
+.part-node:hover{border-color:#f9d3a6;background:#23423e}
+.part-node.suspect{border-color:#efb47c;background:linear-gradient(135deg,#493529,#292d30)}
+.part-node.suspect .node-symbol{background:#e6a363;color:#322319}
+.part-node.suspect .node-status{color:#ffd4a4}
+.part-node.suspect .node-status i{background:#ffb77a;box-shadow:0 0 9px #ffb77a}
+.part-node.fixed{border-color:#a4edbb;background:linear-gradient(135deg,#1d483c,#15332f)}
+.part-node.fixed .node-symbol{background:#b6f0c8;color:#193b29}
+.part-node.fixed .node-status{color:#d3ffdc}
+.part-node.fixed .node-status i{background:#b5efbb;box-shadow:0 0 8px #b5efbb}
+.part-node.active{
+  border:2px solid #f5ebba;
+  background:linear-gradient(145deg,#416154,#29443f);
+  box-shadow:0 0 0 5px #f5eab72b,0 12px 24px #0009;
+  transform:translate(-50%,-50%) scale(1.035);
+}
+.part-node.active .node-symbol{background:#f3d7a4;color:#25322c}
+.bench-bottom{border-bottom:1px solid #344d49;margin:0 16px 12px;padding:0 2px 13px;align-items:center}
+.bench-bottom strong{font-size:17px;letter-spacing:-.3px}
+.selection{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border:1px solid #537b6b;background:#183a34;padding:14px;margin:0 14px 15px;
+}
+.selection strong{display:block;color:#f0ffdf;font-size:15px;margin-top:5px}
+.selection small{line-height:1.45}
+.selected-state{min-width:125px;max-width:45%;border-left:1px solid #517363;padding-left:13px;text-align:right}
+.selected-state strong{font:11px 'DM Mono',monospace;color:#b9ddd2;letter-spacing:.2px}
+.selected-state.is-suspect strong{color:var(--orange)}
+.selected-state.is-fixed strong{color:var(--mint)}
+.tools-panel .panel-head{padding:14px 17px}
+.tools-panel .panel-body{
+  display:grid;
+  grid-template-columns:minmax(150px,1fr) minmax(225px,1.55fr) minmax(155px,.85fr);
+  gap:13px;padding:15px;
+}
+.tools-panel .tools section{display:flex;flex-direction:column;gap:10px;min-width:0}
+.tools-panel .tool-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.tools-panel .btn:not(.run-test){text-align:center;padding:9px 5px;min-height:56px}
+.tools-panel .btn span{font-size:9px;line-height:1.4}
+.tools-panel .run-test{height:80px;line-height:1.25;margin:0}
+.tools-panel .manual{grid-column:1/-1;margin:0;background:#172a29}
+.terminal-panel{
+  display:flex;flex-direction:column;
+  height:clamp(580px,calc(100vh - 145px),900px);
+  max-height:none;min-height:580px;
+  position:relative;
+}
+.terminal-head{flex-shrink:0;padding:17px}
+.terminal-head h2{font-size:19px;margin-top:5px}
+.terminal-screen{
+  flex:1;min-height:0;display:flex;flex-direction:column;
+  margin:12px;padding:0;background:#0a1819;
+  border:1px solid #426b62;border-radius:10px;overflow:hidden;
+  box-shadow:inset 0 0 18px #020a0b;
+}
+.terminal-path,.terminal-foot{
+  font:9px 'DM Mono',monospace;letter-spacing:.6px;color:#91b5a7;
+  padding:13px 12px;background:#152c2a;display:flex;justify-content:space-between;gap:9px;
+}
+.terminal-path{border-bottom:1px solid #335b51;overflow-wrap:anywhere}
+.terminal-path span{color:#bcf2c5;white-space:nowrap}
+.terminal-foot{border-top:1px solid #335b51;flex-shrink:0}
+.terminal-feed{
+  flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  list-style:none;margin:0;padding:15px 10px 22px;
+  scrollbar-color:#658e7d #0a1819;
+  display:flex;flex-direction:column;gap:10px;
+}
+.log-entry{
+  border:1px solid #2c4c46;border-left:3px solid #719688;background:#172c2a;
+  border-radius:8px;padding:10px 12px;flex-shrink:0;overflow-wrap:anywhere
+}
+.log-entry.log-warn{border-left-color:#eda56f;background:#34281e}
+.log-entry.log-good{border-left-color:#a9f0b8;background:#1d3b30}
+.log-meta{display:flex;justify-content:space-between;gap:9px;margin-bottom:8px;color:#b5cbbf;font:10px 'DM Mono',monospace;letter-spacing:.7px}
+.log-warn .log-meta{color:#ffc392}.log-good .log-meta{color:#c1ffd0}
+.log-message{font:12px/1.6 'DM Mono',monospace;color:#e0eae0;white-space:pre-wrap}
+.terminal-panel.log-expanded{
+  position:fixed;inset:3vh 4vw;z-index:30;width:auto;height:auto;max-height:94vh;min-height:0;
+  box-shadow:0 0 0 100vmax #020808e8,0 30px 80px #000;
+}
+.terminal-panel.log-expanded .terminal-feed{font-size:14px}
+@media(max-width:1300px){
+ .game-grid{grid-template-columns:minmax(205px,.85fr) minmax(375px,1.65fr) minmax(240px,.95fr)}
+ .tools-panel .panel-body{grid-template-columns:1fr 1.15fr}
+ .tools-panel .tools section:nth-child(3){grid-column:1/-1}
+ .tools-panel .run-test{height:55px}
+}
+@media(max-width:1100px){
+ .game-grid{grid-template-columns:minmax(0,1.45fr) minmax(265px,.85fr)}
+ .order-column{grid-column:1/-1}
+ .workstation{grid-column:1}
+ .terminal-column{grid-column:2;position:sticky;top:15px}
+ .tools-panel{grid-column:auto}
+ .terminal-panel{height:clamp(530px,calc(100vh - 100px),800px);min-height:530px}
+ .bench{min-height:380px}
+}
+@media(max-width:760px){
+ .game-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+ .order-column,.workstation,.terminal-column{grid-column:1}
+ .terminal-column{position:static}
+ .terminal-panel{height:430px;min-height:0}
+ .tools-panel .panel-body{grid-template-columns:1fr}
+ .tools-panel .tools section:nth-child(3),.tools-panel .manual{grid-column:1}
+ .tools-panel .run-test{height:60px}
+ .bench{min-height:355px}
+ .part-node{width:clamp(86px,23%,115px);min-height:65px}
+ .bench-ruler{font-size:8px}
+ .selection{align-items:flex-start}
+}
+@media(max-width:400px){
+ .bench{min-height:330px;margin:10px}
+ .part-node{width:85px;padding:7px 5px;min-height:60px}
+ .part-node .node-name{font-size:10px}
+ .part-node .node-status{font-size:8px}
+ .part-node .node-symbol{min-width:20px;min-height:20px}
+ .bench-ruler{top:20px;left:22px}
+ .bench-no{left:19px}
+ .selection strong{font-size:13px}
+ .selected-state{min-width:100px}
+ .selected-state strong{font-size:10px}
+}

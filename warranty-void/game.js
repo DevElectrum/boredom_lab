@@ -49,8 +49,8 @@
     persist();render();
   }
   function mark(s,kind,message) {
-    s.notes.unshift({kind,message});
-    s.notes=s.notes.slice(0,9);
+    s.notes.push({kind,message});
+    s.notes=s.notes.slice(-180);
   }
   let audioContext;
   function chirp(success=true){
@@ -174,32 +174,28 @@
       const selected=s.selected===p.id;
       return `<button class="part-node ${state} ${selected?"active":""}" style="left:${p.x}%;top:${p.y}%"
         data-action="select" data-part="${esc(p.id)}" aria-pressed="${selected}" title="${esc(p.role)}">
-        <span class="node-symbol" aria-hidden="true">${["◇","▦","⌁","⬡"][i]}</span><span class="node-name">${esc(p.name)}</span>
-        <span class="node-status">${esc(status)}</span></button>`;
-    }).join("");
-    const edges=[[0,1],[1,2],[2,3],[3,0],[1,3]].map(([i,j])=>{
-      const p=device.parts[i],q=device.parts[j];
-      return `<line x1="${p.x}" y1="${p.y}" x2="${q.x}" y2="${q.y}"></line>`;
+        <span class="node-symbol" aria-hidden="true">${String(i+1).padStart(2,"0")}</span><span class="node-name">${esc(p.name)}</span>
+        <span class="node-status"><i aria-hidden="true"></i>${esc(status)}</span></button>`;
     }).join("");
     const p=part();
+    const selectedStatus=p?(fixedPartIds.has(p.id)?"REPAIRED":s.suspects.includes(p.id)?"ANOMALY DETECTED":s.job.probed.includes(p.id)?"PROBED":s.job.inspected.includes(p.id)?"INSPECTED":"UNTESTED"):"AWAITING SELECTION";
     return `<section class="panel">
       <div class="panel-head"><h2 class="panel-title">Disassembly bench</h2><span class="pill">UNIT ${esc(device.model.split(" / ")[0])}</span></div>
       <div class="bench" role="group" aria-label="Clickable appliance components">
-        <div class="device-face"></div><span class="device-inscription">${esc(device.symbol)}</span>
-        <svg class="wires" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${edges}<circle cx="50" cy="52" r="2.6"></circle></svg>
+        <div class="bench-surface" aria-hidden="true"><span class="bench-ruler">01 · DISASSEMBLY ZONE</span><span class="bench-no">QSI SERVICE / ${esc(device.model)}</span></div>
+        <div class="device-art" aria-hidden="true">${WarrantyBenchArt.render(def.appliance)}</div>
         ${nodes}<span class="device-serial">SERVICE PANEL / 04 NODES</span>
       </div>
       <div class="bench-bottom">
         <div><strong>${esc(device.name)}</strong><div class="muted">${esc(device.description)}</div></div>
-        <span class="pill">${s.job.repaired.length}/${def.faultIds.length} repaired</span>
+        <span class="pill">${s.job.repaired.length}/${def.faultIds.length} repairs complete</span>
       </div>
       <div class="selection" aria-live="polite">
-      ${p?`<strong>SELECTED: ${esc(p.name)}</strong><small>${esc(p.role)}. Choose INSPECT or PROBE to identify the problem, then select a repair.</small>`:
-      `<strong>NO COMPONENT SELECTED</strong><small>Tap a component on the bench to start your investigation.</small>`}
-      </div>
-      <div class="readout"><div class="label">Service terminal / live output</div>
-        <div class="terminal" role="status" aria-live="polite"><span class="prompt">QSI:\\diagnostic&gt; </span>${esc(s.last)}</div>
-        <div class="activity">${s.notes.slice(0,5).map(n=>`<div class="activity-item ${n.kind==="warn"?"bad":n.kind==="good"?"good":""}">${esc(n.message)}</div>`).join("")}</div>
+        <div><div class="label">Active component</div>
+          <strong>${p?esc(p.name):"Nothing selected"}</strong>
+          <small>${p?esc(p.role):"Choose a labelled component on the machine to begin."}</small></div>
+        <div class="selected-state ${selectedStatus==="REPAIRED"?"is-fixed":selectedStatus==="ANOMALY DETECTED"?"is-suspect":""}">
+          <span class="label">Condition</span><strong>${esc(selectedStatus)}</strong></div>
       </div>
     </section>`;
   }
@@ -230,6 +226,19 @@
         </details>
       </div>
     </section>`;
+  }
+  function renderTerminal(s){
+    const entries=(s.notes||[]).map((entry,i)=>{
+      const tone=entry.kind==="good"?"log-good":entry.kind==="warn"?"log-warn":"log-info";
+      const label=entry.kind==="good"?"SUCCESS":entry.kind==="warn"?"ATTENTION":"INFO";
+      return '<li class="log-entry '+tone+'"><div class="log-meta"><span>'+label+'</span><span>#'+String(i+1).padStart(3,"0")+'</span></div><div class="log-message">'+esc(entry.message)+'</div></li>';
+    }).join("");
+    return '<aside class="panel terminal-panel" aria-label="Service terminal history">' +
+      '<div class="panel-head terminal-head"><div><div class="eyebrow">LIVE SERVICE FEED</div><h2 class="panel-title">Service terminal</h2></div>' +
+      '<button class="btn ghost tiny terminal-toggle" data-action="toggle-log" aria-expanded="false" aria-label="Expand service log">Expand ↗</button></div>' +
+      '<div class="terminal-screen"><div class="terminal-path">QSI://REPAIR-DIAGNOSTICS <span>● LIVE</span></div>' +
+      '<ol id="terminal-feed" class="terminal-feed" aria-label="Diagnostic and repair history" tabindex="0">'+entries+'</ol>' +
+      '<div class="terminal-foot"><span>'+s.notes.length+' ENTRIES</span><span>SCROLL TO REVIEW ↑↓</span></div></div></aside>';
   }
   function renderOrder(s){
     const def=s.def;
@@ -290,15 +299,17 @@
       <span class="pill">${s.phase==="work"?"BENCH OPEN":"SERVICE COMPLETE"}</span>
       </div>
       <div class="game-grid">
-        ${renderOrder(s)}
-        ${renderBench(s)}
-        ${renderTools(s)}
+        <div class="order-column">${renderOrder(s)}</div>
+        <div class="workstation">${renderBench(s)}${renderTools(s)}</div>
+        <div class="terminal-column">${renderTerminal(s)}</div>
       </div>
       ${s.phase==="complete"?resultOverlay(s):s.phase==="ending"?endingOverlay():""}`;
   }
   function render(){
     renderHeader();
     document.querySelector("#app").innerHTML=data.active?renderGame():renderMenu();
+    const feed=document.querySelector("#terminal-feed");
+    if(feed)feed.scrollTop=feed.scrollHeight;
   }
   document.addEventListener("click",event=>{
     const button=event.target.closest("[data-action]");
@@ -307,9 +318,13 @@
     if(action==="story"||action==="endless")openMode(action);
     else if(action==="menu"){data.active=null;persist();render();}
     else if(action==="sound"){data.sound=!data.sound;persist();render();if(data.sound)chirp();}
+    else if(action==="toggle-log"){
+      const panel=document.querySelector(".terminal-panel");
+      if(panel){const expanded=panel.classList.toggle("log-expanded");button.setAttribute("aria-expanded",String(expanded));button.textContent=expanded?"Close ×":"Expand ↗";}
+    }
     else if(action==="select"){
       const s=current();
-      if(s&&s.phase==="work"){s.selected=button.dataset.part;s.last=`COMPONENT SELECTED\n${part()?.name||s.selected}\nChoose a diagnostic or repair tool.`;persist();render();}
+      if(s&&s.phase==="work"){s.selected=button.dataset.part;s.last=`COMPONENT SELECTED\n${part()?.name||s.selected}\nChoose a diagnostic or repair tool.`;mark(s,"info","SELECTED: "+(part()?.name||s.selected));persist();render();}
     }
     else if(action==="inspect"||action==="probe")diagnose(action);
     else if(action==="fix")fix(button.dataset.fix);

@@ -58,6 +58,8 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .
+      - name: Allow artifact indexing
+        run: sleep 12
       - name: Publish game
         id: deployment
         uses: actions/deploy-pages@v4

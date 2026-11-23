@@ -11,6 +11,8 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.ready }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,11 +22,28 @@ jobs:
         run: |
           node --check warranty-void/engine.js
           node --check warranty-void/game.js
-      - name: Run engine tests
-        run: node --test warranty-void/tests/engine.test.cjs
+      - name: Run game tests
+        run: node --test warranty-void/tests/*.test.cjs
+      - name: Detect whether GitHub Pages is enabled
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          status=$(curl -s -o /dev/null -w '%{http_code}' \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/${{ github.repository }}/pages")
+          if [ "$status" = "200" ]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+            echo 'Pages is enabled; deployment may proceed.'
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            echo 'Pages is not enabled. Tests can pass; enable GitHub Pages in Settings > Pages to deploy.'
+          fi
 
   publish:
     needs: verify
+    if: needs.verify.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -36,8 +55,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: .

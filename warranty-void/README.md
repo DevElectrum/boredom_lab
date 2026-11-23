@@ -6,9 +6,11 @@ You are the newest appliance technician at Questionable Solutions Inc. The machi
 
 ## Start playing
 
-Open `warranty-void/index.html` in a browser, or visit the GitHub Pages version once publishing has been enabled for this repository.
+Open `warranty-void/index.html` in a browser, or use GitHub Pages once it is enabled for this repository. The Pages address will be `https://develectrum.github.io/boredom_lab/warranty-void/`.
 
-The game is plain HTML, CSS and JavaScript. It uses no frameworks, builds, account login, paid APIs, or network calls to run. Fonts fall back to system fonts offline. Progress is saved locally in your browser, separately for both modes.
+**One-time GitHub Pages setup (repository owner):** Open the repository **Settings → Pages**, choose **GitHub Actions** as the build/deployment source, then open **Actions → Verify and publish Warranty Void → Run workflow**. Until Pages is enabled, the automated tests still pass and publishing is skipped. GitHub's Pages settings cannot be enabled through the current GitHub integration.
+
+The game is plain HTML, CSS and JavaScript. It uses no frameworks, builds, account login, paid APIs, or network calls to run. Fonts fall back to system fonts offline. Progress is saved in your browser's local storage, separately for both modes. For reliable saves on phones, use the hosted Pages version; some browsers restrict storage when opening files directly.
 
 ## How a job works
 
@@ -47,13 +49,14 @@ Switching modes through the workshop menu preserves an unfinished job in each mo
 - `engine.js`: shared case data, diagnostics, repairs, test rules, story content and endless generator
 - `game.js`: UI, mode switching, decisions, audio toggle, local save/resume
 - `tests/engine.test.cjs`: Node's built-in unit tests for solvable jobs, wrong repairs, and branching endings
+- `tests/ui.test.cjs`: simulated browser/controller tests for story, endless, interaction, and save/resume
 
 To run checks from the repo root:
 
 ```sh
 node --check warranty-void/engine.js
 node --check warranty-void/game.js
-node --test warranty-void/tests/engine.test.cjs
+node --test warranty-void/tests/*.test.cjs
 ```
 
 ## Current limits and next ideas

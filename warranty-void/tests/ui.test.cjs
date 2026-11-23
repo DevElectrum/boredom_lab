@@ -5,6 +5,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const engineSource = fs.readFileSync(path.join(__dirname, "../engine.js"), "utf8");
 const gameSource = fs.readFileSync(path.join(__dirname, "../game.js"), "utf8");
+const benchSource = fs.readFileSync(path.join(__dirname, "../bench-art.js"), "utf8");
 
 function boot(existing = new Map()) {
   const nodes = {"#app": {innerHTML: ""}, "#nav": {innerHTML: ""}};
@@ -22,6 +23,7 @@ function boot(existing = new Map()) {
   };
   const ctx = vm.createContext(sandbox);
   vm.runInContext(engineSource, ctx);
+  vm.runInContext(benchSource, ctx);
   vm.runInContext(gameSource, ctx);
   return {
     ctx,

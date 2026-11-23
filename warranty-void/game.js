@@ -5,7 +5,7 @@
   const SAVE_KEY="boredom-lab-warranty-void-v1";
   const emptySlot=(mode)=>({
     index:0,round:1,completed:0,def:null,job:null,phase:"work",
-    selected:null,notes:[],suspects:[],last:mode==="story"?"The repair division welcomes you.":"Awaiting the next questionable work order."
+    selected:null,notes:[],suspects:[],logVersion:2,last:mode==="story"?"The repair division welcomes you.":"Awaiting the next questionable work order."
   });
   const fresh=()=>({
     version:1,active:null,story:emptySlot("story"),endless:emptySlot("endless"),
@@ -27,6 +27,7 @@
           const s=data[m];
           if(s.def && (!E.validateCase(s.def) || !s.job)) data[m]=emptySlot(m);
           if(!Array.isArray(data[m].notes))data[m].notes=[];
+          if(!data[m].logVersion){data[m].notes.reverse();data[m].logVersion=2;}
           if(!Array.isArray(data[m].suspects))data[m].suspects=[];
         }
       }
@@ -38,6 +39,7 @@
     const def=mode==="story"?E.STORY[s.index]:E.generateEndless(s.round);
     if(!def)return;
     s.def=def;s.job=E.startJob(def);s.phase="work";s.selected=null;s.suspects=[];
+    s.logVersion=2;
     s.notes=[{kind:"info",message:"Work order received. Inspect the machine, run a diagnostic, then attempt a repair."}];
     s.last=`TICKET LOADED\n${def.complaint}\nSelect a component to begin.`;
   }

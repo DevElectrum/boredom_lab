@@ -109,3 +109,46 @@ test("wrong repair leaves the job open and surfaces feedback", () => {
   assert.match(t.nodes["#app"].innerHTML, /TEST FAILED/);
   assert.equal(t.progress().story.phase, "work");
 });
+
+
+test("the v0.2 workshop places tools beneath the bench and keeps a separate log", () => {
+  const t = boot();
+  t.click("story");
+  const screen = t.nodes["#app"].innerHTML;
+  assert.match(screen, /class="order-column"/);
+  assert.match(screen, /class="workstation"/);
+  assert.match(screen, /class="terminal-column"/);
+  assert.match(screen, /class="appliance-svg"/);
+  assert.ok(screen.indexOf("Disassembly bench") < screen.indexOf("Repair kit"));
+  assert.ok(screen.indexOf("Repair kit") < screen.indexOf("Service terminal"));
+  assert.match(screen, /id="terminal-feed"/);
+  t.click("select", {part:"lever"});
+  t.click("probe");
+  t.click("fix", {fix:"reset"});
+  const notes = t.progress().story.notes;
+  assert.ok(notes.length >= 4);
+  assert.match(notes[0].message, /Work order received/);
+  assert.match(notes[1].message, /SELECTED/);
+  assert.match(notes[2].message, /STATE LOCKED/);
+  assert.match(notes[3].message, /REPAIR ACCEPTED/);
+});
+
+test("old save data retains story progress and migrates the log order", () => {
+  const storage = new Map();
+  const t = boot(storage);
+  t.click("story");
+  t.click("select", {part:"lever"});
+  t.click("probe");
+  const old = t.progress();
+  old.story.notes.reverse();
+  delete old.story.logVersion;
+  delete old.endless.logVersion;
+  storage.set("boredom-lab-warranty-void-v1", JSON.stringify(old));
+  const resumed = boot(storage);
+  resumed.click("story");
+  const migrated = resumed.progress().story;
+  assert.equal(migrated.index, 0);
+  assert.equal(migrated.logVersion, 2);
+  assert.match(migrated.notes[0].message, /Work order received/);
+  assert.match(migrated.notes.at(-1).message, /STATE LOCKED/);
+});

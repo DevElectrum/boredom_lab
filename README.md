@@ -13,15 +13,15 @@ We dream up ideas, build playable prototypes, and keep the fun ones. No deadline
 
 Each project gets its own folder. Browser-based creations are preferred when practical, so they can run on a phone or computer.
 
-## Games in design
+## Games
 
-| Game | Premise | Design document |
+| Game | Stage | Links |
 | --- | --- | --- |
-| **Please Hold** | Handle increasingly absurd customer-service calls with real decisions and consequences. | [Read design](docs/please-hold.md) |
-| **Warranty Void** | Diagnose and repair deeply questionable appliances at a hands-on workbench. | [Read design](docs/warranty-void.md) |
+| **Warranty Void** | **Playable browser prototype**: diagnose and repair baffling appliances. Includes a six-chapter Story Mode, four possible endings, and procedural Endless Mode. | [Game folder](warranty-void/) · [Controls and tests](warranty-void/README.md) · [Design](docs/warranty-void.md) |
+| **Please Hold** | Concept: investigate ridiculous customer-service complaints and make decisions with consequences. | [Design](docs/please-hold.md) |
 
-Both games are planned with **Story Mode** (authored, branching campaigns) and **Endless Mode** (replayable cases built from consistent rules). They may share a fictional corporate universe, but neither should depend on playing the other.
+Both games are planned around **Story Mode** (authored campaigns) and **Endless Mode** (replayable cases built from consistent rules). The Warranty Void prototype already includes both. They may share a fictional corporate universe, but neither depends on playing the other.
 
-These are living concepts, not locked specifications. Current stage: **design only**.
+The [Boredom Lab site](https://develectrum.github.io/boredom_lab/) can host browser builds once GitHub Pages is enabled. You can also open `warranty-void/index.html` locally, without installing anything.
 
 **Rule zero:** Fun first. It's okay to abandon an experiment and try something new.

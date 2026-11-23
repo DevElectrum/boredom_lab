@@ -12,6 +12,19 @@ Open `warranty-void/index.html` in a browser, or use GitHub Pages once it is ena
 
 The game is plain HTML, CSS and JavaScript. It uses no frameworks, builds, account login, paid APIs, or network calls to run. Fonts fall back to system fonts offline. Progress is saved in your browser's local storage, separately for both modes. For reliable saves on phones, use the hosted Pages version; some browsers restrict storage when opening files directly.
 
+## v0.2 workshop layout
+
+The first interface overhaul focuses on the repair workspace rather than new content:
+
+- **Desktop:** work order on the left, illustrated appliance bench in the center, repair tools immediately below it, and a dedicated scrolling service log on the right.
+- **Phone:** work order, bench, tool tray, then a scrollable service log. The log can be expanded for easier reading.
+- Each of the four appliances now has distinctive built-in vector artwork.
+- Component tiles have clearer untouched, selected, suspicious, and repaired states; the selected-part readout displays the active component and its status.
+- Every selection, inspection, probe, repair, and test is written to the service log in chronological order. Up to 180 entries are retained per job.
+- Existing browser saves and completed story endings are preserved. Older logs migrate automatically.
+
+No new story, appliance or repair rules were introduced in this pass.
+
 ## How a job works
 
 1. Read the **work order** to see the customer's complaint.
@@ -47,6 +60,7 @@ Switching modes through the workshop menu preserves an unfinished job in each mo
 - `index.html`: browser entry point
 - `styles.css`: responsive workbench UI
 - `engine.js`: shared case data, diagnostics, repairs, test rules, story content and endless generator
+- `bench-art.js`: device-specific repair bench SVG artwork
 - `game.js`: UI, mode switching, decisions, audio toggle, local save/resume
 - `tests/engine.test.cjs`: Node's built-in unit tests for solvable jobs, wrong repairs, and branching endings
 - `tests/ui.test.cjs`: simulated browser/controller tests for story, endless, interaction, and save/resume

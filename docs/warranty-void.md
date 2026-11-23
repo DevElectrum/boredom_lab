@@ -1,5 +1,5 @@
 # Warranty Void
-> **Status:** Concept / design notes. No implementation yet.
+> **Status:** First playable browser prototype exists at [warranty-void/](../warranty-void/). This document describes the broader design; not every planned feature is implemented.
 
 ## Premise
 You work at the repair bench of **Questionable Solutions Inc.**, servicing appliances with surprisingly human problems and machines that were clearly designed by committees.
@@ -87,3 +87,15 @@ Support tickets from **[Please Hold](please-hold.md)** might become work orders 
 - How detailed should wiring and diagnostic tools become?
 - Is there a shop budget / parts inventory, or would that create unwanted stress?
 - How many symptoms should a single appliance be able to express?
+
+## Prototype checkpoint (2026-11-23)
+- A playable, click-to-select repair bench, diagnostic inspections and probes, four repair actions, and a working final appliance test.
+- Four appliance types with defined faults. All faults map to discoverable evidence and a valid repair.
+- Story Mode: six short authored jobs, two branching decisions, four possible endings.
+- Endless Mode: generated jobs, gradually introducing two and then three simultaneous faults; no forced ending.
+- Browser-local saves for both modes, with independent resume and mode switching.
+- Node tests for story solvability, procedural case solvability, wrong-fix behavior and endings.
+
+**Not yet implemented:** freeform disassembly/rewiring, animated physical components, rich customer interactions, or cross-game tickets. Those remain possible expansions rather than claims about the prototype.
+
+See [game instructions](../warranty-void/README.md) for controls, limits and testing.

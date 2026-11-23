@@ -86,7 +86,7 @@
     const result=E.repair(s.def,s.job,s.selected,action);
     s.job=result.state;
     s.last=`${result.result.correct?"REPAIR ACCEPTED":"REPAIR INEFFECTIVE"}\n${result.result.message}`;
-    mark(s,result.result.correct?"good":"warn",result.result.message);
+    mark(s,result.result.correct?"good":"warn",s.last);
     chirp(result.result.correct);persist();render();
   }
   function runTest(){
